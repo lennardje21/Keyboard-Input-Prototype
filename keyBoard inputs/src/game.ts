@@ -1,6 +1,5 @@
 import * as PIXI from "pixi.js";
 
-import { questionBox } from "./questionBox";
 import { Assets } from "./assets"
 import { Enemy } from "./enemy";
 import { Background } from "./background";
@@ -49,7 +48,6 @@ export class Game {
 
     //this.bandit = new Enemy(this, banditFrames)
 
-    this.makeQbox();
 
     this.pixi.ticker.add((delta: number) => this.update(delta) )
   }
@@ -97,11 +95,6 @@ export class Game {
               enemyFrames.push(texture)
     }
     return enemyFrames
-  }
-
-  makeQbox() {
-    let qBox = null;
-    qBox = new questionBox(this);
   }
 
   update(delta: number) {

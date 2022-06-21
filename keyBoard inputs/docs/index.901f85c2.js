@@ -519,7 +519,6 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Game", ()=>Game
 );
 var _pixiJs = require("pixi.js");
-var _questionBox = require("./questionBox");
 var _assets = require("./assets");
 var _enemy = require("./enemy");
 var _background = require("./background");
@@ -554,7 +553,6 @@ class Game {
         //creeër een nieuwe zombie
         //this.zombie = new Enemy(this, enemyFrames)
         //this.bandit = new Enemy(this, banditFrames)
-        this.makeQbox();
         this.pixi.ticker.add((delta)=>this.update(delta)
         );
     }
@@ -587,17 +585,13 @@ class Game {
         }
         return enemyFrames;
     }
-    makeQbox() {
-        let qBox = null;
-        qBox = new _questionBox.questionBox(this);
-    }
     update(delta) {
         this.bandit.move();
     }
 }
 new Game;
 
-},{"pixi.js":"dsYej","./questionBox":"l0HAd","./assets":"jyCU7","./enemy":"e8Rej","./background":"6FKGH","./hero":"jMGFP","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dsYej":[function(require,module,exports) {
+},{"pixi.js":"dsYej","./assets":"jyCU7","./enemy":"e8Rej","./background":"6FKGH","./hero":"jMGFP","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dsYej":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "utils", ()=>_utils
@@ -37094,207 +37088,12 @@ function __extends(d, b) {
     return AnimatedSprite1;
 }(_sprite.Sprite);
 
-},{"@pixi/core":"7PEF8","@pixi/sprite":"9mbxh","@pixi/ticker":"8ekG7","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"l0HAd":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "questionBox", ()=>questionBox
-);
-var _pixiJs = require("pixi.js");
-var _answerBox = require("./answerBox");
-var _check = require("./check");
-var _crossSprite = require("./crossSprite");
-class questionBox {
-    answers = [];
-    constructor(game){
-        this.game = game;
-        //fetch questions from json file
-        fetch("question.json").then((response)=>{
-            if (!response.ok) throw new Error(response.statusText);
-            let json = response.json();
-            return json;
-        }).then((json)=>{
-            this.generateQuestion(json, game);
-        }).catch(this.errorHandler);
-    }
-    generateQuestion(data, game) {
-        //get random question
-        this.questionId = this.getRandomInt(1, 3);
-        this.question = data[this.questionId].question;
-        //question box sprite
-        this.qBoxSprite = new _pixiJs.Sprite(game.loader.resources["qBoxSprite"].texture);
-        this.qBoxSprite.scale.set(2);
-        this.qBoxSprite.x = 100;
-        this.qBoxSprite.y = 10;
-        this.game.pixi.stage.addChild(this.qBoxSprite);
-        //question text
-        this.qText = new _pixiJs.Text(this.question, {
-            fontFamily: "Arial",
-            fontSize: 24,
-            fill: 0,
-            align: "center"
-        });
-        this.qText.x = this.qBoxSprite.x + 20;
-        this.qText.y = this.qBoxSprite.y + 20;
-        this.game.pixi.stage.addChild(this.qText);
-        //generate answers
-        for(let i = 0; i < 3; i++){
-            let answer = new _answerBox.Answer(game, this, i);
-            this.answers.push(answer);
-        }
-    }
-    async answerHandler(event, answer, correctAnswer) {
-        if (answer === correctAnswer) {
-            //TODO: correct answer behaviour (generate new question, give hitpoints to enemy)
-            console.log("correct answer");
-            //show that the answer is correct
-            let check = new _check.Check(this.game, this);
-            //lock the answers so you cant answer correct multiple times
-            this.answers.forEach((a, index)=>{
-                //change to black and white texture
-                a.aBoxSprite.texture = this.game.loader.resources["aBoxSpriteDeactivated"].texture;
-                a.aBoxSprite.interactive = false;
-                a.aBoxSprite.buttonMode = false;
-            });
-            //wait 5 seconds
-            await this.sleep(5000);
-            //generate a new question
-            this.game.makeQbox();
-        } else {
-            //TODO: wrong answer behaviour (generate new question, give hitpoints to player)
-            console.log("wrong answer");
-            //show that the answer is wrong
-            let cross = new _crossSprite.Cross(this.game, this);
-            //lock the answers so you cant answer correct multiple times
-            this.answers.forEach((a, index)=>{
-                //change to black and white texture
-                a.aBoxSprite.texture = this.game.loader.resources["aBoxSpriteDeactivated"].texture;
-                a.aBoxSprite.interactive = false;
-                a.aBoxSprite.buttonMode = false;
-            });
-            //wait 5 seconds
-            await this.sleep(5000);
-            //generate a new question
-            this.game.makeQbox();
-        }
-    }
-    sleep(ms) {
-        return new Promise((resolve)=>setTimeout(resolve, ms)
-        );
-    }
-    errorHandler(event) {
-        console.log(event);
-    }
-    getRandomInt(min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-}
-
-},{"pixi.js":"dsYej","./answerBox":"1r5FN","./check":"8MCqV","./crossSprite":"a28w1","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"1r5FN":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "Answer", ()=>Answer
-);
-var _pixiJs = require("pixi.js");
-class Answer {
-    constructor(game, qBox, i){
-        this.game = game;
-        this.questionBox = qBox;
-        //fetch questions from json file
-        fetch("question.json").then((response)=>{
-            if (!response.ok) throw new Error(response.statusText);
-            let json = response.json();
-            return json;
-        }).then((json)=>{
-            this.generateAnswers(json, game, qBox, i);
-        }).catch(this.errorHandler);
-    }
-    generateAnswers(data, game, qBox, i) {
-        //correct answer
-        this.correctAnswer = data[qBox.questionId].correctA;
-        //answer
-        this.answer = data[qBox.questionId].answers[i];
-        //show answer box sprite
-        this.aBoxSprite = new _pixiJs.Sprite(game.loader.resources["aBoxSprite"].texture);
-        this.aBoxSprite.anchor.set(0.5);
-        this.aBoxSprite.x = qBox.qBoxSprite.x + 200 * i + 50;
-        this.aBoxSprite.y = qBox.qBoxSprite.y + 240;
-        //give them text
-        this.aText = new _pixiJs.Text(this.answer, {
-            fontFamily: "Arial",
-            fontSize: 24,
-            fill: 0,
-            align: "center"
-        });
-        this.aText.anchor.set(0.5);
-        this.aText.x = this.aBoxSprite.x;
-        this.aText.y = this.aBoxSprite.y;
-        //make the answer sprite interactive
-        this.aBoxSprite.interactive = true;
-        this.aBoxSprite.buttonMode = true;
-        this.aBoxSprite.on("pointerdown", (event)=>this.onButtonDown(event, qBox, this.answer, this.correctAnswer)
-        );
-        //append answer box sprite and text
-        this.game.pixi.stage.addChild(this.aBoxSprite, this.aText);
-    }
-    onButtonDown(event, qBox, answer, correctAnswer) {
-        qBox.answerHandler(event, answer, correctAnswer);
-    }
-    errorHandler(event) {
-        console.log(event);
-    }
-}
-
-},{"pixi.js":"dsYej","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"8MCqV":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "Check", ()=>Check
-);
-var _pixiJs = require("pixi.js");
-class Check {
-    constructor(game, qBox){
-        this.game = game;
-        this.checkSprite = new _pixiJs.Sprite(game.loader.resources["checkSprite"].texture);
-        this.checkSprite.x = qBox.qBoxSprite.x + 300;
-        this.checkSprite.y = qBox.qBoxSprite.y + 20;
-        this.game.pixi.stage.addChild(this.checkSprite);
-    }
-}
-
-},{"pixi.js":"dsYej","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"a28w1":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "Cross", ()=>Cross
-);
-var _pixiJs = require("pixi.js");
-class Cross {
-    constructor(game, qBox){
-        this.game = game;
-        this.crossSprite = new _pixiJs.Sprite(game.loader.resources["crossSprite"].texture);
-        this.crossSprite.x = qBox.qBoxSprite.x + 300;
-        this.crossSprite.y = qBox.qBoxSprite.y + 20;
-        this.game.pixi.stage.addChild(this.crossSprite);
-    }
-}
-
-},{"pixi.js":"dsYej","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"jyCU7":[function(require,module,exports) {
+},{"@pixi/core":"7PEF8","@pixi/sprite":"9mbxh","@pixi/ticker":"8ekG7","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"jyCU7":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Assets", ()=>Assets
 );
 var _pixiJs = require("pixi.js");
-var _qBoxSpritePng = require("./images/qBoxSprite.png");
-var _qBoxSpritePngDefault = parcelHelpers.interopDefault(_qBoxSpritePng);
-var _aBoxSpritePng = require("./images/aBoxSprite.png");
-var _aBoxSpritePngDefault = parcelHelpers.interopDefault(_aBoxSpritePng);
-var _aBoxSpriteDeactivatedPng = require("./images/aBoxSpriteDeactivated.png");
-var _aBoxSpriteDeactivatedPngDefault = parcelHelpers.interopDefault(_aBoxSpriteDeactivatedPng);
-// import birdSprite1 from "./images/birdSprite1.png"
-var _crossSpritePng = require("./images/crossSprite.png");
-var _crossSpritePngDefault = parcelHelpers.interopDefault(_crossSpritePng);
-var _checkSpritePng = require("./images/checkSprite.png");
-var _checkSpritePngDefault = parcelHelpers.interopDefault(_checkSpritePng);
 var _backgroundPng = require("./images/background.png");
 var _backgroundPngDefault = parcelHelpers.interopDefault(_backgroundPng);
 class Assets extends _pixiJs.Loader {
@@ -37319,33 +37118,9 @@ class Assets extends _pixiJs.Loader {
                 url: "bandit.json"
             },
             {
-                name: "birdJson",
-                url: "bird.json"
-            },
-            {
-                name: "qBoxSprite",
-                url: _qBoxSpritePngDefault.default
-            },
-            {
                 name: "background",
                 url: _backgroundPngDefault.default
-            },
-            {
-                name: "aBoxSprite",
-                url: _aBoxSpritePngDefault.default
-            },
-            {
-                name: "aBoxSpriteDeactivated",
-                url: _aBoxSpriteDeactivatedPngDefault.default
-            },
-            {
-                name: "checkSprite",
-                url: _checkSpritePngDefault.default
-            },
-            {
-                name: "crossSprite",
-                url: _crossSpritePngDefault.default
-            }, 
+            }
         ];
         this.assets.forEach((asset)=>{
             // Add to loader
@@ -37357,8 +37132,8 @@ class Assets extends _pixiJs.Loader {
     }
 }
 
-},{"pixi.js":"dsYej","./images/qBoxSprite.png":"3N9En","./images/aBoxSprite.png":"174qL","./images/aBoxSpriteDeactivated.png":"3IoZl","./images/crossSprite.png":"2oJww","./images/checkSprite.png":"bwOzm","./images/background.png":"fwQMR","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3N9En":[function(require,module,exports) {
-module.exports = require('./helpers/bundle-url').getBundleURL('emE5o') + "qBoxSprite.c6eec9fc.png" + "?" + Date.now();
+},{"pixi.js":"dsYej","./images/background.png":"fwQMR","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fwQMR":[function(require,module,exports) {
+module.exports = require('./helpers/bundle-url').getBundleURL('emE5o') + "background.84053517.png" + "?" + Date.now();
 
 },{"./helpers/bundle-url":"lgJ39"}],"lgJ39":[function(require,module,exports) {
 "use strict";
@@ -37394,22 +37169,7 @@ exports.getBundleURL = getBundleURLCached;
 exports.getBaseURL = getBaseURL;
 exports.getOrigin = getOrigin;
 
-},{}],"174qL":[function(require,module,exports) {
-module.exports = require('./helpers/bundle-url').getBundleURL('emE5o') + "aBoxSprite.e0b77fd8.png" + "?" + Date.now();
-
-},{"./helpers/bundle-url":"lgJ39"}],"3IoZl":[function(require,module,exports) {
-module.exports = require('./helpers/bundle-url').getBundleURL('emE5o') + "aBoxSpriteDeactivated.e6cf7c61.png" + "?" + Date.now();
-
-},{"./helpers/bundle-url":"lgJ39"}],"2oJww":[function(require,module,exports) {
-module.exports = require('./helpers/bundle-url').getBundleURL('emE5o') + "crossSprite.efdb226f.png" + "?" + Date.now();
-
-},{"./helpers/bundle-url":"lgJ39"}],"bwOzm":[function(require,module,exports) {
-module.exports = require('./helpers/bundle-url').getBundleURL('emE5o') + "checkSprite.602f5535.png" + "?" + Date.now();
-
-},{"./helpers/bundle-url":"lgJ39"}],"fwQMR":[function(require,module,exports) {
-module.exports = require('./helpers/bundle-url').getBundleURL('emE5o') + "background.84053517.png" + "?" + Date.now();
-
-},{"./helpers/bundle-url":"lgJ39"}],"e8Rej":[function(require,module,exports) {
+},{}],"e8Rej":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Enemy", ()=>Enemy
