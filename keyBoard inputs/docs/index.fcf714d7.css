@@ -1,0 +1,16 @@
+body {
+  background-color: #fff;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 5rem 0 0;
+  display: flex;
+}
+
+canvas {
+  border: 10px solid #fff;
+  border-radius: 5px;
+  box-shadow: 10px 10px 10rem #0006;
+}
+
+/*# sourceMappingURL=index.fcf714d7.css.map */
