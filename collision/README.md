@@ -1,1 +1,0 @@
-Prototype waarin ik test hoe collision werkt en hoe ik dit zou kunnen toepassen, in de test laat ik mijn karakter dat ik kan bewegen groter worden wanneer die met een ander karakter in aanraking komt, zodra deze aanraking voorbij is word hij weer kleiner
